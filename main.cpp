@@ -1,208 +1,243 @@
-#include<queue>
-#include<stdio.h>
-#include<string.h>
-#include<algorithm>
-#include<stdlib.h>
-#include<vector>
-#include<time.h>
-#include<map>
-#define inf 0x3f3f3f3f
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <iostream>
 using namespace std;
-const int maxn = 200;
-typedef pair<int, int> P;
+int Symbolword(string str);
+int Englishword(char x);
+int Figure(char x);
+void deal();
+string symbol[11]={"void","int","float","char","if","else","while","do","for","return","main"};//ç‰¹æ®Šè‹±æ–‡å­—ç¬¦ä¸²
+int count=1;//å½“å‰æ‰€åœ¨è¡Œæ•°
+int arr[100],Count=0;//é”™è¯¯æ‰€åœ¨è¡Œæ•°ç»„ï¼Œé”™è¯¯ä¸ªæ•°
+char strs[1000];
 
-struct mess{
-    int to;//µ½´ïµØ
-    double dis;
-    mess(int t,double di):to(t),dis(di){}
-};
-struct ma{
-    char city_str[maxn];
-}number[maxn];
-vector<mess> G[maxn];//³ÇÊĞÁÚ½Ó±í
-int pre[maxn];//²¢²é
-int tim[maxn];
-priority_queue<P, vector<P>, greater<P> > que;//¹¹½¨Ğ¡¶¥¶Ñ
-int star, en;
-
-void menu();
-void choice_1_enter();
-void choice_2_enter();
-void Dijkstra1();
-vector<int> getpath(int t);
 
 int main()
 {
-    char choice;
-    while(1)
-    {
-        system("cls");
-        menu();
-        choice=getchar();
-        switch(choice)
-        {
-            case '1':choice_1_enter();break;
-            case '2':choice_2_enter();break;
-            case '3':printf("\n\n\t\t\tĞ»Ğ»Ê¹ÓÃ,ÔÙ¼û!\n\t\t\t°´ÈÎÒâ¼üÍË³ö!\n");return 0;break;
-            default:
-                printf("\n\n\t\t\tÇëÊäÈë²Ëµ¥ÖĞµÄÊı×Ö!(1~2)");
+    for(int i=0;;i++){
+        scanf("%c",&strs[i]);
+        if(strs[i]=='#'){
+            break;
+        }
+    }
+    deal();
+    return 0;
+}
+
+
+int Symbolword(string str){  //åˆ¤æ–­ç‰¹æ®Šå­—ç¬¦ä¸²è¿”å›ç§åˆ«ç 
+    int i,m;
+    for(i=0;i<11;i++){
+        if(str==symbol[i]){
+            m=i+3;
+            return m;
         }
     }
     return 0;
 }
 
-void menu()
-{
-    printf("\n\n\n\n\n\n");
-    printf("\t\t*****************************************\n\t\t*\t\t\t\t\t*\n");
-    printf("\t\t*\tĞ£Ô°µ¼ÓÎÏµÍ³\t\t*\n");
-    printf("\t\t*\t1.Â·¾¶¼ìË÷\t\t\t\t*\n");
-    printf("\t\t*\t2.²é¿´ĞÅÏ¢\t\t\t\t*\n");
-    printf("\t\t*\t3.ÍË³ö\t\t\t\t*\n\t\t*\t\t\t\t»¶Ó­Äú£¡*\n");
-    printf("\t\t*****************************************\n");
+
+int Englishword(char x){ //åˆ¤æ–­æ˜¯å¦æ˜¯è‹±æ–‡å­—æ¯
+    if((x>='A'&&x<='Z')||(x>='a'&&x<='z')){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+int Figure(char x){  //åˆ¤æ–­æ˜¯å¦æ˜¯æ•°å­—
+    if(x>='0'&&x<='9'){
+        return 1;
+    }else{
+        return 0;
+    }
 }
 
-void choice_1_enter()
-{
-    FILE *fp2;
-    int s, e;//ÁÙÊ±±äÁ¿
-    double d;
-    if((fp2=fopen("data.txt", "rb") ) ==NULL)//´ò¿ª²Ù×÷²»³É¹¦
-    {
-        printf("The file can not be opened.\n");
-        exit(1);//½áÊø³ÌĞòµÄÖ´ĞĞ
-    }
-    while(!feof(fp2))
-    {
-        fscanf(fp2,"%d %d %d", &s, &e, &d);
-        G[s].push_back(mess(e,d));
-        G[e].push_back(mess(s,d));
-    }
-    fclose(fp2);
-    FILE *fp3;
-    if((fp3=fopen("map1.txt","rb"))==NULL)
-    {
-        printf("The file can not be opened.\n");
-        exit(1);
-    }
-    int num = 0;
-    while(!feof(fp3))
-    {
-        fscanf(fp3,"%s", number[++num].city_str);
-    }
-    fclose(fp3);
-    while(1)
-    {
-        system("cls");
-        printf("\n\n\n");
-        FILE *fp1;
-        char adr1[100], adr2[100];
-        if((fp1=fopen("map.txt","rb"))==NULL)
-        {
-            printf("The file can not be opened.\n");
-            exit(1);
-        }
-        while(!feof(fp1))
-        {
-            fscanf(fp1,"%s\n", adr1);
-            fscanf(fp1,"%s\n", adr2);
-            printf("\t%-40s%s", adr1, adr2);
-            printf("\n");
-        }
-        fclose(fp1);
-        printf("\tÇë¸ù¾İĞòºÅÊäÈë³öĞĞÆğµãºÍÖÕµã\n");
-        printf("\t³öĞĞÆğµã:");
-        while(1)
-        {
-            scanf("%d", &star);
-            if(star>=1&&star<=32)
-                break;
-            else
-            {
-                continue;
-            }
-        }
-        printf("\t³öĞĞÖÕµã:");
-        while(1)
-        {
-            scanf("%d", &en);
-            if(en>=1&&en<=32)
-                break;
-            else
-            {
-                continue;
-            }
-        }
-        printf("\t×î¼ÑÂ·¾¶ÏÔÊ¾:\n");
-        Dijkstra1();
-        printf("\n\nÊÇ·ñ¼ÌĞø²éÑ¯?(Y/N)\n");
-        char choice=getchar();
-        while(choice!='Y'&&choice!='y'&&choice!='N'&&choice!='n'){
-            choice=getchar();
-        }
-        if(choice=='Y'||choice=='y')
-            continue;
-        else
+
+void deal(){
+    int n;
+    int j=0;//è®¡æ•°stræ•°ç»„ï¼›
+    char str[100];//è¾“å…¥è¿ç»­å­—æ¯ï¼›
+    int i=-1;
+    while(1){
+        i++;
+        if(strs[i]=='#')
             break;
-    }
-}
-
-void choice_2_enter()
-{
-
-}
-vector<int> getpath(int t) {//s -> t
-    vector<int> path;
-    while(t!=-1) {//´Ó t µ¹×Å×ß£¬Ò»Ö±×ßµ½ s
-        path.push_back(t);
-        t=pre[t];
-    }
-    reverse(path.begin(),path.end());
-    return path;
-}
-
-void Dijkstra1()
-{
-    int dis1[maxn];
-    int last;
-    fill(dis1, dis1+150, 0);
-    dis1[star] = 0;
-    que.push(P(0, star));
-    while(!que.empty())
-    {
-        P p = que.top();
-        que.pop();
-        int tmp = p.second;
-        if(p.first > dis1[tmp]) continue;
-        for(unsigned int i = 0;i < G[tmp].size(); i++)
-        {
-            mess m = G[tmp][i];
-            if(dis1[m.to] > dis1[tmp] + m.dis)
-            {
-                dis1[m.to] = dis1[tmp] + m.dis;
-                pre[m.to] = tmp;
-                que.push(P(dis1[m.to], m.to));
+        if(strs[i]==' '||strs[i]=='\t')
+            continue;
+        else if(strs[i]=='\n'&&strs[i-1]!='\n'&&strs[i-1]!=' '){
+            printf("\n");
+            count++;
+        }
+        else if(Figure(strs[i])){ //å¤„ç†æ•°å­—ï¼›
+            while(Figure(strs[i])){
+                str[j]=strs[i];
+                j++;
+                i++;
+            }
+            str[j]='\0';
+            if(Englishword(strs[i])){ //å¤„ç†å­—æ¯ï¼›
+                j=0;
+                while(Englishword(strs[i])){
+                    i++;
+                }
+                printf("LexicalError,");
+                arr[Count]=count;
+                Count++;
+            }else{
+                i--;
+                printf("<2,");
+                printf("%s",str);
+                printf(">,");
             }
         }
-    }
-    printf("\tÏà¶Ô¾àÀë%.d¹«Àï\n\t\tÂ·Ïß:", dis1[en]);
-    vector<int> path1 = getpath(en);
-    vector<int>::iterator it=path1.begin();
-    printf("%s",number[*it].city_str);
-    last = *it;
-    ++it;
-    for(; it!=path1.end(); it++){
-        printf("->");
-        for(unsigned int i = 0;i < G[last].size(); i++)
-        {
-            mess me = G[last][i];
-            if(me.to==*it)
-            {
-                break;
+        else if(Englishword(strs[i])){
+            j=0;
+            while(Englishword(strs[i])){
+                str[j]=strs[i];
+                j++;
+                i++;
+            }
+            str[j]='\0';
+            j=0;
+            i--;
+            n=Symbolword(str);  //åˆ¤æ–­æ˜¯å¦æ˜¯ç‰¹æ®Šå­—ç¬¦ï¼›
+            if(n){
+                printf("<%d,->,",n);
+            }else{
+                printf("<1,");
+                printf("%s",str);
+                printf(">,");
             }
         }
-        printf("%s",number[*it].city_str);
-        last = *it;
+        else{
+            if(strs[i]=='/'){  //å¤„ç†æ³¨é‡Š
+                i++;
+                if(strs[i]=='/'){
+                    while(1){
+                        i++;
+                        if(strs[i]=='\n'){
+                            break;
+                        }
+                    }
+                   // printf("\n");
+                    count++;
+                }else if(strs[i]=='*'){
+                    while(1){
+                        i++;
+                        if(strs[i]=='\n')
+                            count++;
+                        if(strs[i]=='*'){
+                            i++;
+                            if(strs[i]=='/'){
+                                i++;
+                                break;
+                            }
+                            else{
+                                i--;
+                            }
+                        }
+                    }
+                    //printf("\n");
+                    count++;
+                }else{
+                    i--;
+                }
+            }
+            switch(strs[i]){
+                case '+':
+                    printf("<14,->,");break;
+                case '-':
+                    printf("<15,->,");break;
+                case '*':
+                    printf("<16,->,");break;
+                case '/':
+                    printf("<17,->,");break;
+                case '%':
+                    printf("<18,->,");break;
+                case '<':
+                    i++;
+                    if(strs[i]!='='){
+                        printf("<19,->,");
+                        i--;
+                        break;
+                    }
+                    else{
+                        printf("<20,->,");break;
+                    }
+                case '>':
+                    i++;
+                    if(strs[i]!='='){
+                        printf("<21,->,");
+                        i--;
+                        break;
+                    }
+                    else{
+                        printf("<22,->,");break;
+                    }
+                case '=':
+                    i++;
+                    if(strs[i]!='='){
+                        printf("<27,->,");
+                        i--;
+                        break;
+                    }
+                    else{
+                        printf("<23,->,");break;
+                    }
+                case '!':
+                    i++;
+                    if(strs[i]!='='){
+                         i--;
+                        break;
+                    }
+                    else{
+                        printf("<24,->,");break;
+                    }
+                case '&':
+                    i++;
+                    if(strs[i]!='&'){
+                        i--;
+                        break;
+                    }
+                    else{
+                        printf("<25,->,");break;
+                    }
+                case '|':
+                    i++;
+                    if(strs[i]!='|'){
+                         i--;
+                        break;
+                    }
+                    else{
+                        printf("<26,->,");break;
+                    }
+                case '(':
+                    printf("<28,->,");break;
+                case ')':
+                    printf("<29,->,");break;
+                case '[':
+                    printf("<30,->,");break;
+                case ']':
+                    printf("<31,->,");break;
+                case '{':
+                    printf("<32,->,");break;
+                case '}':
+                    printf("<33,->,");break;
+                case ';':
+                    printf("<34,->,");break;
+                case ',':
+                    printf("<35,->,");break;
+            }
+        }
+        if(strs[i]=='#'){
+            break;
+        }
+    }
+    if(Count!=0){ //è¾“å‡ºé”™è¯¯è¡Œï¼›
+        printf("\nLexicalError(s) on line(s) ");
+        for(int i=0;i<Count;i++){
+            printf("%d,",arr[i]);
+        }
     }
 }
-
